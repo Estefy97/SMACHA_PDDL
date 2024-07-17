@@ -1,0 +1,58 @@
+(define (domain charge-battery)
+  (:predicates
+    (state-battery ?state)
+    (transition ?ini ?fin)
+    (ScheduleUse ?Soon)
+    (SolarPanel ?sun)
+    (temperature ?temp)
+    (humidity ?hum)
+    (charge-speed ?velocity)
+    (charge-type ?Solar)
+    (connected-battery ?connected)
+    (BatteryN ?battery)
+  
+  )
+
+
+
+  (:action fast-charge-transition
+    :parameters (?ini-state ?fin-state ?battery)
+    :precondition (and (not(state-battery Choose-ChgType))(BatteryN ?battery)(connected-battery true)(state-battery ?ini-state) (transition ?ini-state ?fin-state)(or(ScheduleUse True)(SolarPanel True)(and(temperature high)(humidity low))))
+    :effect (and (charge-speed fast)(state-battery  ?fin-state)(BatteryN ?battery))
+    )
+  
+  (:action medium-charge-transition
+    :parameters (?ini-state ?fin-state ?battery)
+    :precondition (and (not(state-battery Choose-ChgType))(ScheduleUse false)(BatteryN ?battery)(connected-battery true)(state-battery ?ini-state) (transition ?ini-state ?fin-state)(SolarPanel false)(or(and(temperature low)(humidity low))(and(temperature high)(humidity high))))
+    :effect (and (charge-speed medium)(BatteryN ?battery)(state-battery ?fin-state))
+  )
+  
+  (:action slow-charge-transition
+    :parameters (?ini-state ?fin-state ?battery)
+    :precondition (and (not(state-battery Choose-ChgType))(ScheduleUse false)(BatteryN ?battery)(connected-battery true)(state-battery ?ini-state) (transition ?ini-state ?fin-state)(SolarPanel false)(temperature low)(humidity high))
+    :effect (and (charge-speed slow)(BatteryN ?battery)(state-battery ?fin-state))
+    )
+  
+    (:action stop-charge
+    :parameters ( ?battery )
+    :precondition (and(BatteryN ?battery)(or (state-battery fullycharge)(connected-battery false)))
+    :effect (and (charge-speed stop)(BatteryN ?battery))
+  )
+  
+    (:action Solar-type-transition
+    :parameters (?ini-state ?fin-state ?battery)
+    :precondition (and (state-battery Choose-ChgType)(BatteryN ?battery)(transition ?ini-state ?fin-state)(or(charge-speed medium)(and(connected-battery true)(or(SolarPanel True)(and(temperature high)(humidity low))))))
+    :effect (and (BatteryN ?battery)(state-battery ?fin-state)(charge-type Solar))
+    )
+  (:action mix-type-transition
+    :parameters (?ini-state ?fin-state ?battery)
+    :precondition (and (state-battery Choose-ChgType)(BatteryN ?battery)(connected-battery true)(ScheduleUse true)(state-battery ?ini-state) (transition ?ini-state ?fin-state)(temperature low)(SolarPanel false)(or(and(temperature low)(humidity low))(and(temperature high)(humidity high))))
+    :effect (and (charge-type Mix)(BatteryN ?battery)(state-battery ?fin-state))
+    )
+  (:action oulet-type-transition
+    :parameters (?ini-state ?fin-state ?battery)
+    :precondition (and (state-battery Choose-ChgType)(BatteryN ?battery)(connected-battery true)(or(charge-speed slow)(and(ScheduleUse true)(state-battery ?ini-state) (SolarPanel false)(transition ?ini-state ?fin-state)(temperature low)(humidity high))))
+    :effect (and (charge-type Oulet)(BatteryN ?battery)(state-battery ?fin-state))
+    )
+  
+)

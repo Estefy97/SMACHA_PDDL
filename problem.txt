@@ -1,0 +1,32 @@
+(define (problem charge-battery-problem)
+  (:domain charge-battery)
+
+  (:objects
+    need-charge charging Choose-ChgType fullycharge 
+    high low medium
+    fast slow stop
+    true false
+    Solar Mix Oulet
+    battery1  battery2  battery3
+  )
+
+  (:init
+    (state-battery need-charge)
+    (temperature low)
+    (humidity low)
+    (connected-battery true)
+    (BatteryN battery1)
+    (ScheduleUse false)
+    (SolarPanel false )
+    
+    (transition need-charge Choose-ChgType)
+    (transition Choose-ChgType fullycharge)
+    (transition charging fullycharge)
+  )
+
+  (:goal
+    (charge-speed stop)
+    
+  )
+    
+)
